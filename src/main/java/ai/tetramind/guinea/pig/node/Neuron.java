@@ -21,7 +21,7 @@ public final class Neuron extends Node {
         bias = value;
     }
 
-    public void compute(@NotNull double[] inputs) {
+    public void compute(double @NotNull [] inputs) {
 
         if (weights.length < inputs.length) throw new IllegalStateException();
 

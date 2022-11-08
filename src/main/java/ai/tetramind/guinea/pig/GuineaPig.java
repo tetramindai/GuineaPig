@@ -28,7 +28,7 @@ public final class GuineaPig {
 
         outputs = new Output[output];
         for (var i = 0; i < outputs.length; i++) {
-            outputs[i] = new Output();
+            outputs[i] = new Output(NETWORK_WEIGHT);
         }
     }
 
@@ -47,6 +47,7 @@ public final class GuineaPig {
     }
 
     public void compute() {
+
 
     }
 }

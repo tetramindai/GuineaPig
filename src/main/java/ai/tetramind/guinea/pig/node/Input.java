@@ -9,4 +9,8 @@ public final class Input extends Node {
     public void write(double value) {
         this.value = value;
     }
+
+    protected double load() {
+        return value;
+    }
 }
