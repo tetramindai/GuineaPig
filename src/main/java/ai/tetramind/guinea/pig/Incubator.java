@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class Incubator {
     private static final Random RANDOM = new SecureRandom();
-    private static final int POPULATION_SIZE = 10000;
+    private static final int POPULATION_SIZE = 1000;
     private final AtomicBoolean status;
     private final Set<@NotNull Worker> workers;
     private final Map<@NotNull GuineaPig, Double> individuals;
@@ -27,6 +27,7 @@ public final class Incubator {
         this.dataSet = new HashMap<>(dataSet);
         this.workers = new HashSet<>();
         individuals = new HashMap<>();
+        individuals.put(origin, null);
         status = new AtomicBoolean(true);
         solution = new AtomicReference<>(null);
     }
@@ -52,27 +53,70 @@ public final class Incubator {
 
             while (!isInterrupted() && incubator.status.get()) {
 
-                var size = incubator.individuals.size();
+                var size = 0;
+
+                synchronized (incubator.individuals) {
+                    size = incubator.individuals.size();
+                }
 
                 if (size < POPULATION_SIZE) {
 
-                    incubator.individuals.put(incubator.origin.clone(), null);
+                    createIndividual();
 
                 } else if (size > POPULATION_SIZE) {
 
-                    synchronized (incubator.individuals) {
+                    killIndividual();
 
-                        var values = incubator.individuals.values();
-
-                        var min = Collections.max(values);
-
-                        System.out.println(min);
-                    }
                 }
+
+                if (RANDOM.nextDouble() < 0.3) {
+                    mateIndividual();
+                } else {
+                    mutateIndividual();
+                }
+
+                proceedIndividual();
+            }
+
+            incubator.workers.remove(this);
+        }
+
+        private void mateIndividual() {
+
+            var father = randomIndividual();
+            var mother = randomIndividual();
+
+            var child = father.mate(mother);
+
+            synchronized (incubator.individuals) {
+                incubator.individuals.put(child, null);
+            }
+        }
+
+        private void mutateIndividual() {
+
+            var guineaPig = randomIndividual();
+
+            synchronized (guineaPig) {
+                guineaPig.mutate();
+            }
+        }
+
+        private GuineaPig randomIndividual() {
+
+            synchronized (incubator.individuals) {
 
                 var guineaPigs = incubator.individuals.keySet().stream().toList();
 
-                var guineaPig = guineaPigs.get(RANDOM.nextInt(guineaPigs.size()));
+                return guineaPigs.get(RANDOM.nextInt(guineaPigs.size()));
+            }
+        }
+
+        private void proceedIndividual() {
+
+            var guineaPig = randomIndividual();
+
+            synchronized (guineaPig) {
 
                 var score = 0.0;
 
@@ -87,15 +131,46 @@ public final class Incubator {
                     }
                 }
 
-                incubator.individuals.replace(guineaPig, score);
+                synchronized (incubator.individuals) {
 
-                if(score <= 0.0) {
-                    incubator.solution.set(guineaPig);
-                    incubator.status.set(false);
+                    incubator.individuals.replace(guineaPig, score);
+
+                    if (score <= 0.0) {
+                        incubator.solution.set(guineaPig);
+                        incubator.status.set(false);
+                    }
                 }
             }
+        }
 
-            incubator.workers.remove(this);
+        private void killIndividual() {
+
+            var first = randomIndividual();
+            var second = randomIndividual();
+
+            if (first != second) {
+
+                synchronized (incubator.individuals) {
+
+                    var firstScore = incubator.individuals.get(first);
+                    var secondScore = incubator.individuals.get(second);
+
+                    if (firstScore != null && secondScore != null) {
+                        if (firstScore < secondScore) {
+                            incubator.individuals.remove(second);
+                        } else if (secondScore < firstScore) {
+                            incubator.individuals.remove(first);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void createIndividual() {
+
+            synchronized (incubator.individuals) {
+                incubator.individuals.put(incubator.origin.clone(), null);
+            }
         }
     }
 }
