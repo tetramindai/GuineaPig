@@ -28,7 +28,7 @@ public final class Output extends Node {
             sum += results[i] * weights[i];
         }
 
-        value = sum;
+        value = (2.0 / (1.0 + Math.pow(Math.E, -2.0 * sum)) - 1.0);
     }
 
     public void changeWeight(int index, double value) {

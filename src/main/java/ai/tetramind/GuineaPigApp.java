@@ -38,9 +38,10 @@ public final class GuineaPigApp {
                 lastValue = v[0];
             }
 
-            var result = ai.evaluate(values)[0] > 0.0;
+            var result = ai.evaluate(values);
 
-            if (ordered == result) {
+
+            if (ordered == result[0] > 0.0) {
                 success++;
             } else {
                 ai.randomMutation();
