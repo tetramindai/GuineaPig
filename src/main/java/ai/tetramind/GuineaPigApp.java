@@ -2,7 +2,7 @@ package ai.tetramind;
 
 import ai.tetramind.guinea.pig.GuineaPig;
 
-import java.util.Arrays;
+import java.security.SecureRandom;
 
 public final class GuineaPigApp {
 
@@ -11,21 +11,36 @@ public final class GuineaPigApp {
 
     public static void main(String[] args) {
 
+        var random = new SecureRandom();
+
         var ai = new GuineaPig(1, 1);
-
-        var input = ai.input(0);
-
-        input.write(0.5);
-
-        var output = ai.output(0);
 
         while (true) {
 
-            ai.compute();
+            var values = new double[10][1];
 
-            ai.randomMutation();
+            var ordered = true;
+            Double lastValue = null;
 
-            System.out.println("Value : " + output.read());
+            for (var v : values) {
+
+                v[0] = random.nextDouble();
+
+                if (lastValue != null && lastValue > v[0]) {
+                    ordered = false;
+                }
+
+                lastValue = v[0];
+            }
+
+            var result = ai.evaluate(values)[0] > 0.0;
+
+            if (ordered && result) {
+                System.out.println("Good !");
+            } else {
+                ai.randomMutation();
+                System.out.println("Mutation !");
+            }
         }
     }
 }

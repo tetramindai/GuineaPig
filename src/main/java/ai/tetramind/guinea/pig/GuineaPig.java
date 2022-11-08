@@ -166,6 +166,36 @@ public final class GuineaPig {
     }
 
 
+    public double[] evaluate(@NotNull double[][] dataset) {
+
+        var result = new double[outputs.length];
+
+        Arrays.fill(result, Node.DEFAULT_VALUE);
+
+        for (var values : dataset) {
+
+            if (values.length != inputs.length) throw new IllegalStateException();
+
+            for (var i = 0; i < values.length; i++) {
+
+                var input = input(i);
+
+                input.write(values[i]);
+            }
+
+            compute();
+        }
+
+        for (var o = 0; o < outputs.length; o++) {
+
+            var output = output(o);
+
+            result[o] = output.read();
+        }
+
+        return result;
+    }
+
     public void randomMutation() {
 
         var layerIndex = random.nextInt(neurons.length + 1);
