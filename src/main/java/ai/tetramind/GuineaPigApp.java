@@ -1,55 +1,28 @@
 package ai.tetramind;
 
-import ai.tetramind.guinea.pig.GuineaPig;
+import ai.tetramind.guinea.pig.Incubator;
 
-import java.security.SecureRandom;
+import java.util.HashMap;
 
 public final class GuineaPigApp {
+    private final static int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
     private GuineaPigApp() {
     }
 
     public static void main(String[] args) {
 
-        var random = new SecureRandom();
+        System.out.println("GuineaPig Started");
 
-        var ai = new GuineaPig(1, 1);
+        var dataSet = new HashMap<double[][], double[]>();
+        dataSet.put(new double[][]{{0.5}, {0.6}, {0.8}}, new double[]{-0.5});
+        dataSet.put(new double[][]{{0.9}, {0.6}, {0.8}}, new double[]{-0.5});
+        dataSet.put(new double[][]{{0.5}, {0.5}, {0.8}}, new double[]{-0.5});
 
-        var cycle = 0;
-        var success = 0;
+        var incubator = new Incubator(dataSet);
 
-        while (true) {
-
-            cycle++;
-
-            var values = new double[2][1];
-
-            var ordered = true;
-            Double lastValue = null;
-
-            for (var v : values) {
-
-                v[0] = random.nextDouble();
-
-                if (lastValue != null && lastValue > v[0]) {
-                    ordered = false;
-                }
-
-                lastValue = v[0];
-            }
-
-            var result = ai.evaluate(values);
-
-
-            if (ordered == result[0] > 0.0) {
-                success++;
-            } else {
-                ai.randomMutation();
-            }
-
-            if (cycle % 100 == 0) {
-                System.out.println(Math.round(success * 100.0 / cycle) + "%");
-            }
+        for (var i = 0; i < AVAILABLE_PROCESSORS; i++) {
+            incubator.createWorker();
         }
     }
 }

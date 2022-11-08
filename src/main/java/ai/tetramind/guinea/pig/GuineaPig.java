@@ -8,12 +8,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 
-public final class GuineaPig {
+public final class GuineaPig implements Genetic {
 
-    private final Random random;
-
+    private static final Random RANDOM = new SecureRandom();
     private final static int NETWORK_HEIGHT = 100;
     private final static int NETWORK_WEIGHT = (int) (NETWORK_HEIGHT * 1.618033988);
     private final Input[] inputs;
@@ -23,8 +23,6 @@ public final class GuineaPig {
     public GuineaPig(int input, int output) {
 
         if (input <= 0 || output <= 0) throw new IllegalStateException();
-
-        random = new SecureRandom();
 
         inputs = new Input[input];
         for (var i = 0; i < inputs.length; i++) {
@@ -166,7 +164,7 @@ public final class GuineaPig {
     }
 
 
-    public double[] evaluate(@NotNull double[][] dataset) {
+    public double @NotNull [] evaluate(double @NotNull [] @NotNull [] dataset) {
 
         var result = new double[outputs.length];
 
@@ -196,21 +194,45 @@ public final class GuineaPig {
         return result;
     }
 
-    public void randomMutation() {
+    public @NotNull GuineaPig mate(@NotNull GuineaPig guineaPig) {
 
-        var layerIndex = random.nextInt(neurons.length + 1);
+        if (inputs.length != guineaPig.inputs.length || outputs.length != guineaPig.outputs.length)
+            throw new IllegalStateException();
 
-        var randomValue = random.nextDouble() * (random.nextBoolean() ? -1.0 : 1.0);
+        var child = new GuineaPig(inputs.length, outputs.length);
+
+        System.arraycopy(inputs, 0, child.inputs, 0, inputs.length);
+
+        var middleLayer = neurons.length / 2;
+
+        for (var l = 0; l < middleLayer; l++) {
+            System.arraycopy(neurons[l], 0, child.neurons[l], 0, neurons[l].length);
+        }
+
+        for (var l = middleLayer; l < guineaPig.neurons.length; l++) {
+            System.arraycopy(guineaPig.neurons[l], 0, child.neurons[l], 0, guineaPig.neurons[l].length);
+        }
+
+        System.arraycopy(guineaPig.outputs, 0, child.outputs, 0, guineaPig.outputs.length);
+
+        return child;
+    }
+
+    public void mutate() {
+
+        var layerIndex = RANDOM.nextInt(neurons.length + 1);
+
+        var randomValue = RANDOM.nextDouble() * (RANDOM.nextBoolean() ? -1.0 : 1.0);
 
         if (layerIndex >= neurons.length) {
 
-            var outputIndex = random.nextInt(outputs.length);
+            var outputIndex = RANDOM.nextInt(outputs.length);
 
             var output = outputs[outputIndex];
 
             var weightsLength = output.getWeightsLength();
 
-            var weightIndex = random.nextInt(weightsLength);
+            var weightIndex = RANDOM.nextInt(weightsLength);
 
             output.changeWeight(weightIndex, randomValue);
 
@@ -218,11 +240,11 @@ public final class GuineaPig {
 
             var layer = neurons[layerIndex];
 
-            var neuronIndex = random.nextInt(layer.length);
+            var neuronIndex = RANDOM.nextInt(layer.length);
 
             var neuron = layer[neuronIndex];
 
-            if (random.nextBoolean()) {
+            if (RANDOM.nextBoolean()) {
 
                 neuron.changeBias(randomValue);
 
@@ -230,10 +252,29 @@ public final class GuineaPig {
 
                 var weightsLength = neuron.getWeightsLength();
 
-                var weightIndex = random.nextInt(weightsLength);
+                var weightIndex = RANDOM.nextInt(weightsLength);
 
                 neuron.changeWeight(weightIndex, randomValue);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) return true;
+
+        if (!(obj instanceof GuineaPig guineaPig)) return false;
+
+        if (!Arrays.equals(inputs, guineaPig.inputs)) return false;
+
+        if (!Arrays.deepEquals(neurons, guineaPig.neurons)) return false;
+
+        return Arrays.equals(outputs, guineaPig.outputs);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(inputs), Arrays.hashCode(outputs), Arrays.deepHashCode(neurons));
     }
 }

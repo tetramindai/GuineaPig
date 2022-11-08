@@ -3,8 +3,9 @@ package ai.tetramind.guinea.pig.node;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Objects;
 
-public final class Neuron extends Node {
+public final class Neuron extends Node implements Computed {
     private final double[] weights;
     private double bias;
 
@@ -21,6 +22,7 @@ public final class Neuron extends Node {
         bias = value;
     }
 
+    @Override
     public void compute(double @NotNull [] inputs) {
 
         var sum = bias;
@@ -52,5 +54,22 @@ public final class Neuron extends Node {
 
     public int getWeightsLength() {
         return weights.length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+
+        if (!(o instanceof Neuron neuron)) return false;
+
+        if (neuron.bias != bias) return false;
+
+        return Arrays.equals(weights, neuron.weights);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bias, Arrays.hashCode(weights));
     }
 }

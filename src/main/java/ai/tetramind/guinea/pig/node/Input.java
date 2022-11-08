@@ -12,5 +12,4 @@ public final class Input extends Node {
      public double getValue() {
         return value;
     }
-
 }
