@@ -104,7 +104,7 @@ public final class GuineaPig {
         }
 
         for (var output : outputs) {
-            output.setValue(values);
+            output.compute(values);
         }
     }
 
@@ -178,11 +178,11 @@ public final class GuineaPig {
 
             var output = outputs[outputIndex];
 
-            var weights = output.getWeights();
+            var weightsLength = output.getWeightsLength();
 
-            var weightIndex = random.nextInt(weights.length);
+            var weightIndex = random.nextInt(weightsLength);
 
-            weights[weightIndex] = randomValue;
+            output.changeWeight(weightIndex, randomValue);
 
         } else {
 
@@ -198,11 +198,11 @@ public final class GuineaPig {
 
             } else {
 
-                var weights = neuron.getWeights();
+                var weightsLength = neuron.getWeightsLength();
 
-                var weightIndex = random.nextInt(weights.length);
+                var weightIndex = random.nextInt(weightsLength);
 
-                weights[weightIndex] = randomValue;
+                neuron.changeWeight(weightIndex, randomValue);
             }
         }
     }

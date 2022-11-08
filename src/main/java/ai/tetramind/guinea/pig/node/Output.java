@@ -19,7 +19,7 @@ public final class Output extends Node {
         return value;
     }
 
-    public void setValue(double @NotNull [] results) {
+    public void compute(double @NotNull [] results) {
 
         if (weights.length != results.length) throw new IllegalStateException();
 
@@ -42,5 +42,7 @@ public final class Output extends Node {
         return weights.clone();
     }
 
-
+    public int getWeightsLength() {
+        return weights.length;
+    }
 }

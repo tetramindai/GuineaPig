@@ -2,6 +2,8 @@ package ai.tetramind;
 
 import ai.tetramind.guinea.pig.GuineaPig;
 
+import java.util.Arrays;
+
 public final class GuineaPigApp {
 
     private GuineaPigApp() {

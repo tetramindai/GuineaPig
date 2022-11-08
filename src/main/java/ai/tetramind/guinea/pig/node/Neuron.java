@@ -49,4 +49,8 @@ public final class Neuron extends Node {
     public double getResult() {
         return value;
     }
+
+    public int getWeightsLength() {
+        return weights.length;
+    }
 }
