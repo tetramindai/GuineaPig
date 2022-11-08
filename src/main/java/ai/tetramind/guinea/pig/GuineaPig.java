@@ -163,7 +163,26 @@ public final class GuineaPig implements Genetic, Cloneable {
     }
 
 
+    public void forgot() {
+
+        for (var input : inputs) {
+            input.reset();
+        }
+
+        for (var layer : neurons) {
+            for (var neuron : layer) {
+                neuron.reset();
+            }
+        }
+
+        for (var output : outputs) {
+            output.reset();
+        }
+    }
+
     public double @NotNull [] evaluate(double @NotNull [] @NotNull [] dataset) {
+
+        forgot();
 
         var result = new double[outputs.length];
 
@@ -281,8 +300,6 @@ public final class GuineaPig implements Genetic, Cloneable {
     public GuineaPig clone() {
 
         var result = new GuineaPig(inputs.length, outputs.length);
-
-
 
         return result;
     }

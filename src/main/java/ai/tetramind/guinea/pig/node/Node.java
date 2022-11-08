@@ -11,6 +11,10 @@ public abstract class Node implements Serializable {
         value = DEFAULT_VALUE;
     }
 
+    public void reset() {
+        value = DEFAULT_VALUE;
+    }
+
     @Override
     public String toString() {
         return String.valueOf(value);

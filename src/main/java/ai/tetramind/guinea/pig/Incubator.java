@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class Incubator {
     private static final Random RANDOM = new SecureRandom();
-    private static final int POPULATION_SIZE = 1000;
+    private static final int POPULATION_SIZE = 10000;
     private final AtomicBoolean status;
     private final Set<@NotNull Worker> workers;
     private final Map<@NotNull GuineaPig, Double> individuals;
@@ -18,6 +18,8 @@ public final class Incubator {
     private final AtomicReference<GuineaPig> solution;
 
     private final GuineaPig origin;
+
+    private final AtomicReference<Double> fitness;
 
     public Incubator(@NotNull Map<double[][], double[]> dataSet, @NotNull GuineaPig origin) {
 
@@ -30,6 +32,7 @@ public final class Incubator {
         individuals.put(origin, null);
         status = new AtomicBoolean(true);
         solution = new AtomicReference<>(null);
+        fitness = new AtomicReference<>(Double.MAX_VALUE);
     }
 
     public void createWorker() {
@@ -59,22 +62,17 @@ public final class Incubator {
                     size = incubator.individuals.size();
                 }
 
-                if (size < POPULATION_SIZE) {
-
+                if (size < 2) {
                     createIndividual();
-
                 } else if (size > POPULATION_SIZE) {
-
                     killIndividual();
-
-                }
-
-                if (RANDOM.nextDouble() < 0.3) {
-                    mateIndividual();
                 } else {
-                    mutateIndividual();
+                    if (RANDOM.nextDouble() < 0.3) {
+                        mateIndividual();
+                    } else {
+                        mutateIndividual();
+                    }
                 }
-
                 proceedIndividual();
             }
 
@@ -131,6 +129,11 @@ public final class Incubator {
                     }
                 }
 
+                if (score < incubator.fitness.get()) {
+                    incubator.fitness.set(score);
+                    System.out.println("Fitness" + score);
+                }
+
                 synchronized (incubator.individuals) {
 
                     incubator.individuals.replace(guineaPig, score);
@@ -168,8 +171,10 @@ public final class Incubator {
 
         private void createIndividual() {
 
+            var clone = incubator.origin.clone();
+
             synchronized (incubator.individuals) {
-                incubator.individuals.put(incubator.origin.clone(), null);
+                incubator.individuals.put(clone, null);
             }
         }
     }
