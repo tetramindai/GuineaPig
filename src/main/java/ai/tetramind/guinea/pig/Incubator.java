@@ -1,6 +1,5 @@
 package ai.tetramind.guinea.pig;
 
-import ai.tetramind.GuineaPigApp;
 import org.jetbrains.annotations.NotNull;
 
 import java.security.SecureRandom;
@@ -9,22 +8,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class Incubator {
-
     private static final Random RANDOM = new SecureRandom();
-
     private static final int POPULATION_SIZE = 10000;
     private final AtomicBoolean status;
     private final Set<@NotNull Worker> workers;
     private final Map<@NotNull GuineaPig, Double> individuals;
     private final Map<double[][], double[]> dataSet;
 
-    private AtomicReference<GuineaPig> solution;
+    private final AtomicReference<GuineaPig> solution;
 
-    public Incubator(@NotNull Map<double[][], double[]> dataSet) {
-        this.workers = Collections.synchronizedSet(new HashSet<>());
-        individuals = Collections.synchronizedMap(new HashMap<>());
+    private final GuineaPig origin;
+
+    public Incubator(@NotNull Map<double[][], double[]> dataSet, @NotNull GuineaPig origin) {
+
+        if (dataSet.isEmpty()) throw new IllegalStateException();
+
+        this.origin = origin;
+        this.dataSet = new HashMap<>(dataSet);
+        this.workers = new HashSet<>();
+        individuals = new HashMap<>();
         status = new AtomicBoolean(true);
-        this.dataSet = Collections.synchronizedMap(new HashMap<>(dataSet));
         solution = new AtomicReference<>(null);
     }
 
@@ -47,22 +50,24 @@ public final class Incubator {
         @Override
         public void run() {
 
-            while (!isInterrupted() && !incubator.status.get()) {
+            while (!isInterrupted() && incubator.status.get()) {
 
                 var size = incubator.individuals.size();
 
                 if (size < POPULATION_SIZE) {
 
-                    incubator.individuals.put(new GuineaPig(1, 1), null);
+                    incubator.individuals.put(incubator.origin.clone(), null);
 
                 } else if (size > POPULATION_SIZE) {
 
-                    /*
-                    var values = incubator.individuals.values();
+                    synchronized (incubator.individuals) {
 
-                    var min = Collections.max(values);
-                    */
+                        var values = incubator.individuals.values();
 
+                        var min = Collections.max(values);
+
+                        System.out.println(min);
+                    }
                 }
 
                 var guineaPigs = incubator.individuals.keySet().stream().toList();

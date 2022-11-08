@@ -11,8 +11,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
 
-public final class GuineaPig implements Genetic {
-
+public final class GuineaPig implements Genetic, Cloneable {
     private static final Random RANDOM = new SecureRandom();
     private final static int NETWORK_HEIGHT = 100;
     private final static int NETWORK_WEIGHT = (int) (NETWORK_HEIGHT * 1.618033988);
@@ -276,5 +275,15 @@ public final class GuineaPig implements Genetic {
     @Override
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(inputs), Arrays.hashCode(outputs), Arrays.deepHashCode(neurons));
+    }
+
+    @Override
+    public GuineaPig clone() {
+
+        var result = new GuineaPig(inputs.length, outputs.length);
+
+
+
+        return result;
     }
 }

@@ -1,5 +1,6 @@
 package ai.tetramind;
 
+import ai.tetramind.guinea.pig.GuineaPig;
 import ai.tetramind.guinea.pig.Incubator;
 
 import java.util.HashMap;
@@ -19,7 +20,7 @@ public final class GuineaPigApp {
         dataSet.put(new double[][]{{0.9}, {0.6}, {0.8}}, new double[]{-0.5});
         dataSet.put(new double[][]{{0.5}, {0.5}, {0.8}}, new double[]{-0.5});
 
-        var incubator = new Incubator(dataSet);
+        var incubator = new Incubator(dataSet, new GuineaPig(1,1));
 
         for (var i = 0; i < AVAILABLE_PROCESSORS; i++) {
             incubator.createWorker();
