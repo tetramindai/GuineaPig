@@ -15,9 +15,14 @@ public final class GuineaPigApp {
 
         var ai = new GuineaPig(1, 1);
 
+        var cycle = 0;
+        var success = 0;
+
         while (true) {
 
-            var values = new double[10][1];
+            cycle++;
+
+            var values = new double[2][1];
 
             var ordered = true;
             Double lastValue = null;
@@ -35,11 +40,14 @@ public final class GuineaPigApp {
 
             var result = ai.evaluate(values)[0] > 0.0;
 
-            if (ordered && result) {
-                System.out.println("Good !");
+            if (ordered == result) {
+                success++;
             } else {
                 ai.randomMutation();
-                System.out.println("Mutation !");
+            }
+
+            if (cycle % 100 == 0) {
+                System.out.println(Math.round(success * 100.0 / cycle) + "%");
             }
         }
     }
