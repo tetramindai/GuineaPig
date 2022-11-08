@@ -1,7 +1,6 @@
 package ai.tetramind.guinea.pig.node;
 
 public final class Input extends Node {
-
     public Input() {
         super();
     }
@@ -13,4 +12,5 @@ public final class Input extends Node {
      public double getValue() {
         return value;
     }
+
 }

@@ -6,9 +6,14 @@ import ai.tetramind.guinea.pig.node.Node;
 import ai.tetramind.guinea.pig.node.Output;
 import org.jetbrains.annotations.NotNull;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Random;
 
 public final class GuineaPig {
+
+    private final Random random;
+
     private final static int NETWORK_HEIGHT = 100;
     private final static int NETWORK_WEIGHT = (int) (NETWORK_HEIGHT * 1.618033988);
     private final Input[] inputs;
@@ -16,6 +21,10 @@ public final class GuineaPig {
     private final Output[] outputs;
 
     public GuineaPig(int input, int output) {
+
+        if (input <= 0 || output <= 0) throw new IllegalStateException();
+
+        random = new SecureRandom();
 
         inputs = new Input[input];
         for (var i = 0; i < inputs.length; i++) {
@@ -115,6 +124,86 @@ public final class GuineaPig {
             }
 
             neuron.compute(inputs);
+        }
+    }
+
+    @Override
+    public String toString() {
+
+        var builder = new StringBuilder();
+
+        for (var i = 0; i < inputs.length; i++) {
+
+            builder.append(inputs[i]);
+
+            if (i + 1 < inputs.length) {
+                builder.append(" | ");
+            }
+        }
+
+        builder.append(System.lineSeparator());
+
+        for (var layer : neurons) {
+
+            for (var neuron : layer) {
+
+                builder.append(neuron);
+
+                builder.append(' ');
+            }
+
+            builder.append(System.lineSeparator());
+        }
+
+        for (var output : outputs) {
+
+            builder.append(output);
+
+            builder.append(' ');
+        }
+
+        return new String(builder);
+    }
+
+
+    public void randomMutation() {
+
+        var layerIndex = random.nextInt(neurons.length + 1);
+
+        var randomValue = random.nextDouble() * (random.nextBoolean() ? -1.0 : 1.0);
+
+        if (layerIndex >= neurons.length) {
+
+            var outputIndex = random.nextInt(outputs.length);
+
+            var output = outputs[outputIndex];
+
+            var weights = output.getWeights();
+
+            var weightIndex = random.nextInt(weights.length);
+
+            weights[weightIndex] = randomValue;
+
+        } else {
+
+            var layer = neurons[layerIndex];
+
+            var neuronIndex = random.nextInt(layer.length);
+
+            var neuron = layer[neuronIndex];
+
+            if (random.nextBoolean()) {
+
+                neuron.changeBias(randomValue);
+
+            } else {
+
+                var weights = neuron.getWeights();
+
+                var weightIndex = random.nextInt(weights.length);
+
+                weights[weightIndex] = randomValue;
+            }
         }
     }
 }
