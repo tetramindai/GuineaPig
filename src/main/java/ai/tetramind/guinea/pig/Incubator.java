@@ -3,6 +3,7 @@ package ai.tetramind.guinea.pig;
 import org.jetbrains.annotations.NotNull;
 
 import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -131,7 +132,9 @@ public final class Incubator {
 
                 if (score < incubator.fitness.get()) {
                     incubator.fitness.set(score);
-                    System.out.println("Fitness" + score);
+                    var timestamp = new Timestamp(System.currentTimeMillis());
+                    System.out.println(timestamp + " fitness : " + score);
+                    System.out.println(guineaPig);
                 }
 
                 synchronized (incubator.individuals) {

@@ -134,7 +134,7 @@ public final class GuineaPig implements Genetic, Cloneable {
             builder.append(inputs[i]);
 
             if (i + 1 < inputs.length) {
-                builder.append(" | ");
+                builder.append(' ');
             }
         }
 
