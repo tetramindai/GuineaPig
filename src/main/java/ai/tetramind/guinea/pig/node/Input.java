@@ -10,7 +10,7 @@ public final class Input extends Node {
         this.value = value;
     }
 
-    protected double load() {
+     public double getValue() {
         return value;
     }
 }

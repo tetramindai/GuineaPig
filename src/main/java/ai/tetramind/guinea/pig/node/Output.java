@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 
 public final class Output extends Node {
-
     private final double[] weights;
 
     public Output(int dimension) {
@@ -20,7 +19,7 @@ public final class Output extends Node {
         return value;
     }
 
-    protected void write(double @NotNull [] results) {
+    public void setValue(double @NotNull [] results) {
 
         if (weights.length != results.length) throw new IllegalStateException();
 
@@ -31,4 +30,17 @@ public final class Output extends Node {
 
         value = sum;
     }
+
+    public void changeWeight(int index, double value) {
+
+        if (index < 0 || index >= weights.length) throw new IllegalStateException();
+
+        weights[index] = value;
+    }
+
+    public double[] getWeights() {
+        return weights.clone();
+    }
+
+
 }

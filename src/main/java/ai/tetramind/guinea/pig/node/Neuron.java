@@ -23,13 +23,30 @@ public final class Neuron extends Node {
 
     public void compute(double @NotNull [] inputs) {
 
-        if (weights.length < inputs.length) throw new IllegalStateException();
-
         var sum = bias;
-        for (var i = 0; i < inputs.length; i++) {
+        for (var i = 0; i < inputs.length && i < weights.length; i++) {
             sum += inputs[i] * weights[i];
         }
 
         value = (1.0 / (1.0 + Math.pow(Math.E, -sum)));
+    }
+
+    public void changeWeight(int index, double value) {
+
+        if (index < 0 || index >= weights.length) throw new IllegalStateException();
+
+        weights[index] = value;
+    }
+
+    public double[] getWeights() {
+        return weights.clone();
+    }
+
+    public double getBias() {
+        return bias;
+    }
+
+    public double getResult() {
+        return value;
     }
 }

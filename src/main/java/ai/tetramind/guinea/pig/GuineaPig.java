@@ -2,8 +2,11 @@ package ai.tetramind.guinea.pig;
 
 import ai.tetramind.guinea.pig.node.Input;
 import ai.tetramind.guinea.pig.node.Neuron;
+import ai.tetramind.guinea.pig.node.Node;
 import ai.tetramind.guinea.pig.node.Output;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 public final class GuineaPig {
     private final static int NETWORK_HEIGHT = 100;
@@ -20,9 +23,20 @@ public final class GuineaPig {
         }
 
         neurons = new Neuron[NETWORK_HEIGHT][NETWORK_WEIGHT];
-        for (var i = 0; i < neurons.length; i++) {
-            for (var j = 0; j < neurons[i].length; j++) {
-                neurons[i][j] = new Neuron((i + 1 < neurons.length) ? NETWORK_WEIGHT + 1 : NETWORK_WEIGHT);
+        for (var l = 0; l < neurons.length; l++) {
+            for (var n = 0; n < neurons[l].length; n++) {
+
+                var dimension = 0;
+
+                if (l == 0) {
+                    dimension = inputs.length;
+                } else if (l + 1 < neurons.length) {
+                    dimension = NETWORK_WEIGHT + 1;
+                } else {
+                    dimension = NETWORK_WEIGHT;
+                }
+
+                neurons[l][n] = new Neuron(dimension);
             }
         }
 
@@ -48,6 +62,59 @@ public final class GuineaPig {
 
     public void compute() {
 
+        var values = new double[NETWORK_WEIGHT];
+        var epoch = new double[NETWORK_WEIGHT];
 
+        Arrays.fill(epoch, Node.DEFAULT_VALUE);
+        Arrays.fill(values, Node.DEFAULT_VALUE);
+
+        for (var i = 0; i < inputs.length; i++) {
+            values[i] = inputs[i].getValue();
+        }
+
+        for (var l = 0; l < neurons.length; l++) {
+
+            var layer = neurons[l];
+            var nextLayer = (l + 1 < neurons.length) ? neurons[l + 1] : null;
+
+            Arrays.fill(epoch, Node.DEFAULT_VALUE);
+
+            if (nextLayer != null) {
+                for (var n = 0; n < nextLayer.length; n++) {
+                    epoch[n] = nextLayer[n].getResult();
+                }
+            }
+
+            computeLayer(values, layer, epoch);
+
+            Arrays.fill(values, Node.DEFAULT_VALUE);
+
+            for (var n = 0; n < layer.length; n++) {
+                values[n] = layer[n].getResult();
+            }
+        }
+
+        for (var output : outputs) {
+            output.setValue(values);
+        }
+    }
+
+    private void computeLayer(double @NotNull [] values, @NotNull Neuron[] layer, double @NotNull [] epoch) {
+
+        if (values.length != layer.length) throw new IllegalStateException();
+        if (epoch.length != layer.length) throw new IllegalStateException();
+
+        for (var n = 0; n < layer.length; n++) {
+
+            var neuron = layer[n];
+
+            var inputs = new double[layer.length + 1];
+            System.arraycopy(values, 0, inputs, 0, layer.length);
+            for (var i = layer.length; i < inputs.length; i++) {
+                inputs[i] = epoch[n];
+            }
+
+            neuron.compute(inputs);
+        }
     }
 }
