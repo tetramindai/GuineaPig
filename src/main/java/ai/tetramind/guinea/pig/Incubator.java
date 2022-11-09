@@ -17,20 +17,21 @@ public final class Incubator {
     private final static int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
     private static final Random RANDOM = new SecureRandom();
     private static final int POPULATION_SIZE = 100000;
+
+    private static final int STRUGGLE_DURATION = 100;
+
     private final AtomicBoolean status;
     private final Set<@NotNull Worker> workers;
     private final Map<@NotNull GuineaPig, Double> individuals;
-    private final Map<double[][], double[]> dataSet;
     private final AtomicReference<GuineaPig> solution;
     private final GuineaPig origin;
     private final AtomicReference<Double> fitness;
+    private final Predator predator;
 
-    public Incubator(@NotNull Map<double[][], double[]> dataSet, @NotNull GuineaPig origin) {
+    public Incubator(@NotNull Predator predator, @NotNull GuineaPig origin) {
 
-        if (dataSet.isEmpty()) throw new IllegalStateException();
-
+        this.predator = predator;
         this.origin = origin;
-        this.dataSet = new HashMap<>(dataSet);
         this.workers = new HashSet<>();
         individuals = new HashMap<>();
         individuals.put(origin, null);
@@ -59,7 +60,7 @@ public final class Incubator {
         }
     }
 
-    public GuineaPig getSolution() {
+    public GuineaPig waitSolution() {
 
         try {
             Worker worker = null;
@@ -167,33 +168,42 @@ public final class Incubator {
 
                 var score = 0.0;
 
-                for (var input : incubator.dataSet.keySet()) {
+                for (var s = 0; s < STRUGGLE_DURATION; s++) {
 
-                    var expected = incubator.dataSet.get(input);
+                    var struggle = incubator.predator.generate();
 
-                    var actual = guineaPig.evaluate(input);
+                    if (struggle != null) {
 
-                    for (var i = 0; i < expected.length; i++) {
-                        score += Math.abs(actual[i] - expected[i]);
+                        var inputs = struggle.inputs();
+                        var expected = struggle.expected();
+
+                        var actual = guineaPig.evaluate(inputs);
+
+                        for (var i = 0; i < expected.length; i++) {
+                            score += Math.abs(actual[i] - expected[i]);
+                        }
+
+                    } else {
+                        s--;
                     }
                 }
 
-                if (score < incubator.fitness.get()) {
-
-                    incubator.fitness.set(score);
-
-                    var timestamp = new Timestamp(System.currentTimeMillis());
-
-                    System.out.println(timestamp + " fitness : " + score);
-                }
-
                 synchronized (incubator.individuals) {
+
+                    if (score < incubator.fitness.get()) {
+
+                        incubator.fitness.set(score);
+                        incubator.solution.set(guineaPig);
+
+                        var timestamp = new Timestamp(System.currentTimeMillis());
+
+                        System.out.println(timestamp + " fitness : " + score);
+                    }
 
                     incubator.individuals.replace(guineaPig, score);
 
                     if (score <= 0.0) {
 
-                        incubator.solution.set(guineaPig);
                         incubator.status.set(false);
 
                         try (var outputStream = new ObjectOutputStream(new FileOutputStream("solution"))) {
@@ -202,7 +212,7 @@ public final class Incubator {
                             e.printStackTrace();
                         }
 
-                        System.out.println("Done!");
+                        System.out.println("Done !");
                     }
                 }
             }

@@ -277,6 +277,7 @@ public final class GuineaPig implements Genetic, Cloneable {
         }
     }
 
+
     @Override
     public boolean equals(Object obj) {
 
@@ -295,6 +296,7 @@ public final class GuineaPig implements Genetic, Cloneable {
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(inputs), Arrays.hashCode(outputs), Arrays.deepHashCode(neurons));
     }
+
 
     @Override
     public GuineaPig clone() {

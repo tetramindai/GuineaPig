@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class GuineaPigTest {
     private static final Random RANDOM = new SecureRandom();
 
@@ -55,15 +57,44 @@ class GuineaPigTest {
         return result;
     }
 
+    private class MyPredator implements Predator {
+
+        private final Map<double[][], double[]> dataSet = buildDataSet();
+
+        @Override
+        public Struggle generate() {
+
+            Struggle result = null;
+
+            var keys = dataSet.keySet();
+
+            var index = RANDOM.nextInt(keys.size());
+
+            for (var key : keys) {
+
+                index--;
+
+                if (index < 0) {
+
+                    var expected = dataSet.get(key);
+
+                    result = new Struggle(key, expected);
+                }
+            }
+
+            return result;
+        }
+    }
+
     @Test
     void testWorking() {
 
-        var dataSet = buildDataSet();
-
-        var incubator = new Incubator(dataSet, new GuineaPig(1, 1));
+        var incubator = new Incubator(new MyPredator(), new GuineaPig(1, 1));
 
         incubator.start();
 
-        var solution = incubator.getSolution();
+        var solution = incubator.waitSolution();
+
+        assertNotNull(solution);
     }
 }
