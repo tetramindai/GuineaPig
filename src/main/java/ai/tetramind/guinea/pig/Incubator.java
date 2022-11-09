@@ -21,11 +21,8 @@ public final class Incubator {
     private final Set<@NotNull Worker> workers;
     private final Map<@NotNull GuineaPig, Double> individuals;
     private final Map<double[][], double[]> dataSet;
-
     private final AtomicReference<GuineaPig> solution;
-
     private final GuineaPig origin;
-
     private final AtomicReference<Double> fitness;
 
     public Incubator(@NotNull Map<double[][], double[]> dataSet, @NotNull GuineaPig origin) {
