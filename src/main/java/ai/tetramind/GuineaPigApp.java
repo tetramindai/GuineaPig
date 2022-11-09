@@ -54,8 +54,9 @@ public final class GuineaPigApp {
 
     public static void main(String[] args) {
 
+        System.out.println("Started");
 
-        var incubator = new Incubator(new MyPredator(), new GuineaPig(1, 1));
+        var incubator = new Incubator(new MyPredator(), new GuineaPig(2, 2));
 
         incubator.start();
 
