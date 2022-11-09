@@ -12,6 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class Incubator {
+
+    private final static int DEFAULT_MAX_CYCLE = Integer.MAX_VALUE;
+    private final static int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
     private static final Random RANDOM = new SecureRandom();
     private static final int POPULATION_SIZE = 100000;
     private final AtomicBoolean status;
@@ -37,28 +40,72 @@ public final class Incubator {
         status = new AtomicBoolean(true);
         solution = new AtomicReference<>(null);
         fitness = new AtomicReference<>(Double.MAX_VALUE);
+
+        for (var w = 0; w < AVAILABLE_PROCESSORS; w++) {
+            createWorker();
+        }
     }
 
-    public void createWorker() {
+    private void createWorker() {
 
-        var worker = new Worker(this);
+        var worker = new Worker(this, DEFAULT_MAX_CYCLE);
 
         workers.add(worker);
+    }
 
-        worker.start();
+    public void start() {
+
+        synchronized (workers) {
+            for (var worker : workers) {
+                worker.start();
+            }
+        }
+    }
+
+    public GuineaPig getSolution() {
+
+        try {
+            Worker worker = null;
+
+            do {
+                if (worker != null) {
+                    worker.join();
+                }
+
+                synchronized (workers) {
+
+                    if (!workers.isEmpty()) {
+                        worker = workers.stream().findFirst().get();
+                    }
+                }
+
+            } while (worker != null);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return solution.get();
     }
 
     private static class Worker extends Thread {
+
+
+        private final int maxCycle;
+        private final int cycle;
+
         private final Incubator incubator;
 
-        public Worker(@NotNull Incubator incubator) {
+        public Worker(@NotNull Incubator incubator, int maxCycle) {
             this.incubator = incubator;
+            this.maxCycle = maxCycle;
+            cycle = 0;
         }
 
         @Override
         public void run() {
 
-            while (!isInterrupted() && incubator.status.get()) {
+            while (!isInterrupted() && incubator.status.get() && cycle <= maxCycle) {
 
                 var size = 0;
 
@@ -71,13 +118,14 @@ public final class Incubator {
                 } else if (size > POPULATION_SIZE) {
                     killIndividual();
                 } else {
-                    if (RANDOM.nextDouble() < 0.3) {
-                        mateIndividual();
-                    } else {
-                        mutateIndividual();
-                    }
+                    mateIndividual();
                 }
+
                 proceedIndividual();
+
+                if (RANDOM.nextBoolean()) {
+                    mutateIndividual();
+                }
             }
 
             incubator.workers.remove(this);
