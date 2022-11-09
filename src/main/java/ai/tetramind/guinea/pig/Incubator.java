@@ -2,6 +2,9 @@ package ai.tetramind.guinea.pig;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.util.*;
@@ -111,7 +114,7 @@ public final class Incubator {
             }
         }
 
-        private void proceedIndividual() {
+        private void proceedIndividual() throws RuntimeException {
 
             var guineaPig = randomIndividual();
 
@@ -131,10 +134,12 @@ public final class Incubator {
                 }
 
                 if (score < incubator.fitness.get()) {
+
                     incubator.fitness.set(score);
+
                     var timestamp = new Timestamp(System.currentTimeMillis());
+
                     System.out.println(timestamp + " fitness : " + score);
-                    System.out.println(guineaPig);
                 }
 
                 synchronized (incubator.individuals) {
@@ -142,8 +147,17 @@ public final class Incubator {
                     incubator.individuals.replace(guineaPig, score);
 
                     if (score <= 0.0) {
+
                         incubator.solution.set(guineaPig);
                         incubator.status.set(false);
+
+                        try (var outputStream = new ObjectOutputStream(new FileOutputStream("solution"))) {
+                            outputStream.writeObject(guineaPig);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        System.out.println("Done!");
                     }
                 }
             }

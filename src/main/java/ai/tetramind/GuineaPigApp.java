@@ -12,7 +12,7 @@ public final class GuineaPigApp {
 
     private static final Random RANDOM = new SecureRandom();
 
-    private final static int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+    private final static int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors() * 10;
 
     private GuineaPigApp() {
     }
