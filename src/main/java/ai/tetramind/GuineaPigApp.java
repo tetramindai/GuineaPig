@@ -8,6 +8,7 @@ import ai.tetramind.guinea.pig.Struggle;
 import java.io.*;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Random;
 
@@ -15,7 +16,7 @@ public final class GuineaPigApp {
 
     private static double[][] loadTrainData() {
 
-        var tmp = new ArrayList<double[]>();
+        var tmp = new LinkedList<double[]>();
 
         double lastValue = 0.0;
         long lastTime = 0;
@@ -33,9 +34,9 @@ public final class GuineaPigApp {
 
                 if (lastValue != 0.0 && lastTime != 0.0) {
                     var element = new double[2];
-                    element[0] = (time - lastTime) * 1000.0 / lastTime;
+                    element[0] = (lastTime - time) * 1000.0 / lastTime;
                     element[1] = (value - lastValue) / lastValue;
-                    tmp.add(element);
+                    tmp.add(0, element);
                 }
 
                 lastValue = value;
@@ -56,7 +57,7 @@ public final class GuineaPigApp {
 
         System.out.println("Started");
 
-        var incubator = new Incubator(new MyPredator(), new GuineaPig(2, 2));
+        var incubator = new Incubator(new MyPredator(), new GuineaPig(2, 1));
 
         incubator.start();
 
@@ -88,14 +89,33 @@ public final class GuineaPigApp {
         @Override
         public Struggle generate() {
 
-            var index = RANDOM.nextInt(data.length - PAST_LENGTH - 1);
+            Struggle result = null;
+
+            var index = RANDOM.nextInt(data.length - PAST_LENGTH);
 
             var inputs = new double[PAST_LENGTH][2];
             System.arraycopy(data, index, inputs, 0, inputs.length);
 
-            var output = data[index + 1];
+            double mean = 0.0;
+            double timeLaps = 0.0;
+            int count = 0;
 
-            return new Struggle(inputs, output);
+            double[] targetData = null;
+            for (var i = index; i < data.length; i++) {
+
+                targetData = data[i];
+
+                mean += targetData[1];
+                timeLaps += targetData[0];
+                count++;
+
+                if (timeLaps >= 3.5971719160290006E-05) {
+                    result = new Struggle(inputs, new double[]{mean / count});
+                    break;
+                }
+            }
+
+            return result;
         }
     }
 }
