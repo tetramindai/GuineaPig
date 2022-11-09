@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class Incubator {
     private static final Random RANDOM = new SecureRandom();
-    private static final int POPULATION_SIZE = 10000;
+    private static final int POPULATION_SIZE = 100000;
     private final AtomicBoolean status;
     private final Set<@NotNull Worker> workers;
     private final Map<@NotNull GuineaPig, Double> individuals;
