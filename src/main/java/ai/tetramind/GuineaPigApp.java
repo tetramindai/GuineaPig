@@ -7,7 +7,6 @@ import ai.tetramind.guinea.pig.Struggle;
 
 import java.io.*;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Random;
@@ -60,6 +59,18 @@ public final class GuineaPigApp {
         var incubator = new Incubator(new MyPredator(), new GuineaPig(2, 1));
 
         incubator.start();
+
+        try (var stdin = new BufferedReader(new InputStreamReader(System.in))) {
+
+            while (!Objects.equals(stdin.readLine(), "stop"));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Stopping");
+
+        incubator.stop();
 
         var solution = incubator.waitSolution();
 

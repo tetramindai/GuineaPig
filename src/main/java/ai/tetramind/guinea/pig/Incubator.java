@@ -70,7 +70,6 @@ public final class Incubator {
                 }
 
                 synchronized (workers) {
-
                     if (!workers.isEmpty()) {
                         worker = workers.stream().findFirst().get();
                     }
@@ -85,9 +84,11 @@ public final class Incubator {
         return solution.get();
     }
 
+    public void stop() {
+        status.set(false);
+    }
+
     private static class Worker extends Thread {
-
-
         private final int maxCycle;
         private final int cycle;
 
