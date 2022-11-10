@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class Incubator {
-
     private final static int DEFAULT_MAX_CYCLE = Integer.MAX_VALUE;
     private final static int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
     private static final Random RANDOM = new SecureRandom();
